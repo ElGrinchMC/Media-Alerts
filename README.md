@@ -3,22 +3,25 @@
 ```markdown  
 # 🎥 Media Alerts  
 
-Media Alerts is a lightweight and customizable plugin designed for Minecraft streamers. With a simple command, you can notify your players in the chat whenever you're live! Perfect for keeping your audience engaged while you play.  
+Media Alerts is a lightweight and customizable plugin designed for Minecraft streamers. With a simple
+command, you can notify your players in the chat whenever you're live!
+Perfect for keeping your audience engaged while you play.  
 
 ---
 
 ## 📸 Preview  
 
 *Below, you can add a screenshot or a GIF of the plugin in action.*  
-![Media Alerts in Action](./preview.png)  
+![Media Alerts in Action](https://github.com/user-attachments/assets/aedf8475-36e3-4cd7-984e-f6bdd8d06d1b)
+  
 
 ---
 
 ## ✨ Features  
 
-- 📢 Send real-time notifications to the chat when you're streaming.  
-- ⚙️ Fully customizable messages to suit your style.  
-- 🪶 Lightweight and easy to use.  
+- 📢 Send notifications to the chat when you're streaming.  
+- ⚙️ Easy and ready to use.  
+- 🪶 Light and elegant to give the best image to your stream.  
 
 ---
 
@@ -26,9 +29,12 @@ Media Alerts is a lightweight and customizable plugin designed for Minecraft str
 
 | **Command**          | **Description**                  | **Permission**        |  
 |-----------------------|----------------------------------|-----------------------|  
-| `/stream start`       | Sends a "stream started" alert.  | `mediaalerts.start`   |  
-| `/stream end`         | Sends a "stream ended" alert.    | `mediaalerts.end`     |  
-| `/stream reload`      | Reloads the plugin configuration.| `mediaalerts.reload` |  
+| `/media`               | Manin plugin command.            | `media.use`           |  
+| `/media add`           | Add a YouTube, Kick or Twitch    | `-`                   |
+|                        | channel.                         | `media.add`           |  
+| `/media remove`        | Remove a channel.                | `media.remove`        |
+| `/media alert`         | Send a stream alert.             | `media.alert`         |
+| `/media alert (orther)`| Send a orther user stream alert. | `media.alert.others`  | 
 
 ---
 
@@ -37,7 +43,6 @@ Media Alerts is a lightweight and customizable plugin designed for Minecraft str
 1. Download the latest version of Media Alerts from the [Releases](https://github.com/YourUsername/MediaAlerts/releases) page.  
 2. Drop the `.jar` file into your server's `plugins` folder.  
 3. Restart or reload your server.  
-4. Edit the `config.yml` file to customize the messages (optional).  
 
 ---
 
@@ -56,7 +61,7 @@ Found a bug or have an idea for a new feature? Open an issue or create a pull re
 
 ## 🛠️ Support  
 
-Need help? Have questions? Feel free to reach out through the [GitHub Issues](https://github.com/YourUsername/MediaAlerts/issues) section.  
+Need help? Have questions? Feel free to reach out through my discord @datebloxi.  
 
 ---
 
