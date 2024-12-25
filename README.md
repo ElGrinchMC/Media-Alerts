@@ -10,7 +10,7 @@ Perfect for keeping your audience engaged while you play.
 
 ## 📸 Preview  
 
-*Below, you can add a screenshot or a GIF of the plugin in action.*  
+*Here you can see the plugin in action.*  
 ![Media Alerts in Action](https://github.com/user-attachments/assets/aedf8475-36e3-4cd7-984e-f6bdd8d06d1b)
   
 
