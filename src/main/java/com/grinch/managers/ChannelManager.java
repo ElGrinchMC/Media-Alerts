@@ -165,7 +165,7 @@ public class ChannelManager {
         } else if (link.startsWith("https://www.kick.com/")) {
             return link.substring("https://www.kick.com/".length());
         } else {
-            return ""; // Or handle differently if the link is not from a known platform
+            return ""; // Or handle differently if the link is not from a known platfor
         }
     }
 
