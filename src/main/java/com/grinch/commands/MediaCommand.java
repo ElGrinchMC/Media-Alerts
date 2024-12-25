@@ -28,35 +28,35 @@ public class MediaCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage(ChatColor.RED + "Use: /media <add/remove/alert>");
+            sender.sendMessage(ChatColor.RED + "Usage: /media <add/remove/alert>");
             return true;
         }
 
         if (args[0].equalsIgnoreCase("add")) {
-            // /media add <abreviatura> <plataforma> <link>
+            // /media add <abbreviation> <platform> <link>
             if (!sender.hasPermission("media.add")) {
                 sender.sendMessage(ChatColor.RED + "You do not have permission to use this command.");
                 return true;
             }
             if (args.length < 4) {
-                sender.sendMessage(ChatColor.RED + "Use: /media add <nick> <platform> <service_username>");
+                sender.sendMessage(ChatColor.RED + "Usage: /media add <abbreviation> <platform> <link>");
                 return true;
             }
-            String shortName = args[1].toLowerCase();
+            String shortName = args[1];
             String platform = args[2].toLowerCase();
             String link = args[3];
 
             if (!platform.equalsIgnoreCase("twitch") && !platform.equalsIgnoreCase("youtube") && !platform.equalsIgnoreCase("kick")) {
-                sender.sendMessage(ChatColor.RED + "Invalid platform. Must be 'twitch', 'youtube', or 'kick'.");
+                sender.sendMessage(ChatColor.RED + "Invalid platform. Must be 'twitch', 'youtube' or 'kick'.");
                 return true;
             }
 
             if (channelManager.doesChannelExist(shortName)) {
-                sender.sendMessage(ChatColor.RED + "There is already a channel with this nickname.");
+                sender.sendMessage(ChatColor.RED + "A channel with that abbreviation already exists.");
                 return true;
             }
 
-            // Eliminar la URL base del enlace si está presente
+            // Remove the base URL if present
             link = link.replace("https://www.twitch.tv/", "")
                     .replace("https://www.youtube.com/channel/", "")
                     .replace("https://www.kick.com/", "");
@@ -66,19 +66,19 @@ public class MediaCommand implements CommandExecutor, TabCompleter {
             return true;
 
         } else if (args[0].equalsIgnoreCase("remove")) {
-            // /media remove <abreviatura>
+            // /media remove <abbreviation>
             if (!sender.hasPermission("media.remove")) {
                 sender.sendMessage(ChatColor.RED + "You do not have permission to use this command.");
                 return true;
             }
             if (args.length < 2) {
-                sender.sendMessage(ChatColor.RED + "Use: /media remove <nick>");
+                sender.sendMessage(ChatColor.RED + "Usage: /media remove <abbreviation>");
                 return true;
             }
-            String shortName = args[1].toLowerCase();
+            String shortName = args[1];
 
             if (!channelManager.doesChannelExist(shortName)) {
-                sender.sendMessage(ChatColor.RED + "There is no channel with that nickname.");
+                sender.sendMessage(ChatColor.RED + "There is no channel with that abbreviation.");
                 return true;
             }
 
@@ -87,49 +87,56 @@ public class MediaCommand implements CommandExecutor, TabCompleter {
             return true;
 
         } else if (args[0].equalsIgnoreCase("alert")) {
-            // /media alert <abreviatura>
+            // /media alert <abbreviation>
             if (!sender.hasPermission("media.alert")) {
                 sender.sendMessage(ChatColor.RED + "You do not have permission to use this command.");
                 return true;
             }
             String shortName;
             String playerName;
+            long currentTime = System.currentTimeMillis();
             if (args.length < 2) {
-                // Si no se especifica la abreviatura, se asume que se refiere a sí mismo
+                // If no abbreviation is specified, assume the player is referring to themselves
                 if (!(sender instanceof Player)) {
-                    sender.sendMessage(ChatColor.RED + "You must specify a nickname from the console.");
+                    sender.sendMessage(ChatColor.RED + "You must specify an abbreviation from the console.");
                     return true;
                 }
                 Player player = (Player) sender;
                 playerName = player.getName();
                 shortName = channelManager.getChannelShortName(playerName);
                 if (shortName == null) {
-                    sender.sendMessage(ChatColor.RED + "You do not have a channel associated with your nickname. Use /media alert <nick>.");
+                    sender.sendMessage(ChatColor.RED + "You don't have a channel associated with your name. Use /media alert <abbreviation>.");
                     return true;
                 }
             } else {
-                // Si se especifica la abreviatura, se usa esa
-                shortName = args[1].toLowerCase();
+                // If abbreviation is specified, use that
+                shortName = args[1];
                 if (sender.hasPermission("media.alert.others")) {
-                    // Si tiene el permiso media.alert.others, puede especificar el jugador
+                    // If the player has the media.alert.others permission, they can specify the player
                     if (args.length > 2) {
                         playerName = args[2];
                     } else {
-                        playerName = sender.getName(); // Valor predeterminado si no se especifica
+                        playerName = sender.getName(); // Default value if not specified
                     }
                 } else {
-                    // Si no tiene el permiso, se asume que se refiere a sí mismo
+                    // If the player doesn't have the permission, assume they are referring to themselves
                     if (!(sender instanceof Player)) {
-                        sender.sendMessage(ChatColor.RED + "You must specify a nickname from the console.");
+                        sender.sendMessage(ChatColor.RED + "You must specify an abbreviation from the console.");
                         return true;
                     }
                     Player player = (Player) sender;
                     playerName = player.getName();
                 }
             }
-
             if (!channelManager.doesChannelExist(shortName)) {
-                sender.sendMessage(ChatColor.RED + "There is no channel with that nick.");
+                sender.sendMessage(ChatColor.RED + "There is no channel with that abbreviation.");
+                return true;
+            }
+            
+            // Check cooldown
+            if (channelManager.isOnCooldown(playerName)) {
+                long remainingTime = channelManager.getRemainingCooldown(playerName);
+                sender.sendMessage(ChatColor.RED + "You need to wait " + remainingTime + " seconds before using this command again.");
                 return true;
             }
 
@@ -138,11 +145,12 @@ public class MediaCommand implements CommandExecutor, TabCompleter {
 
             String formattedMessage = messageManager.getFormattedMessage(playerName, platform, link);
             channelManager.sendAlert(formattedMessage, link);
-
+            
+            channelManager.setCooldown(playerName, currentTime);
             return true;
         }
 
-        sender.sendMessage(ChatColor.RED + "Use: /media <add/remove/alert>");
+        sender.sendMessage(ChatColor.RED + "Usage: /media <add/remove/alert>");
         return true;
     }
 
@@ -150,38 +158,38 @@ public class MediaCommand implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         List<String> completions = new ArrayList<>();
         if (args.length == 1) {
-            //Sugerencias para el primer argumento ("/media <subcomando>")
+            //Suggestions for the first argument ("/media <subcommand>")
             StringUtil.copyPartialMatches(args[0], Arrays.asList("add", "remove", "alert"), completions);
         } else if (args.length >= 2 && args[0].equalsIgnoreCase("add")) {
-            //Sugerencias para el segundo argumento y posteriores
+            //Suggestions for the second argument and later
             if (args.length == 2) {
-                // Sugerencia para la abreviatura (segundo argumento)
+                // Suggestion for the abbreviation (second argument)
                 if(sender.hasPermission("media.add")){
-                    completions.add("<nick>");
+                    completions.add("<abbreviation>");
                 }
             } else if (args.length == 3) {
-                // Sugerencia para la plataforma (tercer argumento)
+                // Suggestion for the platform (third argument)
                 if(sender.hasPermission("media.add")){
                     StringUtil.copyPartialMatches(args[2], Arrays.asList("twitch", "youtube", "kick"), completions);
                 }
             } else if (args.length == 4) {
-                // Sugerencia para el enlace (cuarto argumento)
+                // Suggestion for the stream_nick (fourth argument)
                 if(sender.hasPermission("media.add")){
-                    completions.add("<link>");
+                    completions.add("<stream_nick>");
                 }
             }
         } else if (args.length == 2 && args[0].equalsIgnoreCase("remove")) {
-            // Sugerencias para el segundo argumento ("/media remove <abreviatura>")
+            // Suggestions for the second argument ("/media remove <abbreviation>")
             if (sender.hasPermission("media.remove")) {
                 StringUtil.copyPartialMatches(args[1], channelManager.getChannelShortNames(), completions);
             }
         } else if (args.length >= 2 && args[0].equalsIgnoreCase("alert")) {
-            // Sugerencias para el segundo argumento ("/media alert <abreviatura>")
+            // Suggestions for the second argument ("/media alert <abbreviation>")
             if (sender.hasPermission("media.alert")) {
                 StringUtil.copyPartialMatches(args[1], channelManager.getChannelShortNames(), completions);
             }
             if (sender.hasPermission("media.alert.others") && args.length == 3) {
-                // Sugerencia para el nombre del jugador (tercer argumento)
+                // Suggestion for the player name (third argument)
                 for (Player onlinePlayer : sender.getServer().getOnlinePlayers()) {
                     completions.add(onlinePlayer.getName());
                 }
