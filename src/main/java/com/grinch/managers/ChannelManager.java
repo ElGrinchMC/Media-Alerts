@@ -15,15 +15,17 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.concurrent.TimeUnit;
 
 public class ChannelManager {
 
     private final MediaAlertPlugin plugin;
     private final MessageManager messageManager;
-    private final Map<String, ChannelInfo> channels; // <Abreviatura, ChannelInfo>
+    private final Map<String, ChannelInfo> channels; // <Abbreviation, ChannelInfo>
     private final File channelsFile;
     private FileConfiguration channelsConfig;
+    private final Map<String, Long> cooldowns = new HashMap<>(); // <PlayerName, LastUse>
+    private static final long COOLDOWN_TIME = TimeUnit.MINUTES.toMillis(8); // 8 minutes cooldown
 
     public ChannelManager(MediaAlertPlugin plugin, MessageManager messageManager) {
         this.plugin = plugin;
@@ -64,7 +66,7 @@ public class ChannelManager {
             case "kick":
                 return "https://www.kick.com/" + link;
             default:
-                return link; // Devuelve el link original si la plataforma no se reconoce
+                return link; // Returns the original link if the platform is not recognized
         }
     }
 
@@ -75,13 +77,13 @@ public class ChannelManager {
 
     public String getChannelShortName(String playerName) {
         for (Map.Entry<String, ChannelInfo> entry : channels.entrySet()) {
-            if (entry.getValue().getLink().contains(playerName)) {
+            if (entry.getKey().equalsIgnoreCase(playerName)) {
                 return entry.getKey();
             }
         }
         return null;
     }
-    
+
     public Set<String> getChannelShortNames() {
         return channels.keySet();
     }
@@ -107,14 +109,14 @@ public class ChannelManager {
         try {
             channelsConfig.save(channelsFile);
         } catch (IOException e) {
-            plugin.getLogger().severe("Error al guardar channels.yml: " + e.getMessage());
+            plugin.getLogger().severe("Error saving channels.yml: " + e.getMessage());
         }
     }
 
     public void sendAlert(String message, String link) {
         String platform = "";
         String playerName = "";
-        // Obtener la plataforma y el nombre del jugador
+        // Get the platform and player name
         for (Map.Entry<String, ChannelInfo> entry : channels.entrySet()) {
             if (entry.getValue().getLink().equals(link)) {
                 platform = entry.getValue().getPlatform();
@@ -123,33 +125,33 @@ public class ChannelManager {
             }
         }
 
-        // Formatear el nombre de la plataforma para que la primera letra sea mayúscula
+        // Format the platform name to capitalize the first letter
         if (!platform.isEmpty()) {
             platform = platform.substring(0, 1).toUpperCase() + platform.substring(1).toLowerCase();
         }
 
-        // Reemplazar los placeholders en el mensaje
+        // Replace the placeholders in the message
         String formattedPlatform = "&d" + platform + "&r";
         String finalMessage = message.replace("{platform}", formattedPlatform)
                                     .replace("{link}", link)
                                     .replace("{player}", playerName);
 
-        // Crear un componente de texto base
+        // Create a base text component
         ComponentBuilder builder = new ComponentBuilder();
 
-        //Añadir cada linea al builder
+        //Add each line to the builder
         for (String line : finalMessage.split("\n")) {
             builder.append(TextComponent.fromLegacyText(line)).append("\n");
         }
-        
-        // Eliminar el último salto de línea
+
+        // Remove the last line break
         builder.removeComponent(builder.getCursor());
 
-        // Configurar el evento de clic y hover
+        // Set the click and hover events
         builder.event(new ClickEvent(ClickEvent.Action.OPEN_URL, link));
-        builder.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Clic para ir al canal").create()));
+        builder.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to go to the channel").create()));
 
-        // Enviar el mensaje a todos los jugadores
+        // Send the message to all players
         for (Player player : Bukkit.getOnlinePlayers()) {
             player.spigot().sendMessage(builder.create());
         }
@@ -163,11 +165,35 @@ public class ChannelManager {
         } else if (link.startsWith("https://www.kick.com/")) {
             return link.substring("https://www.kick.com/".length());
         } else {
-            return ""; // O manejar de otra manera si el enlace no es de una plataforma conocida
+            return ""; // Or handle differently if the link is not from a known platform
         }
     }
 
-    // Clase interna para almacenar la información del canal
+    // Cooldown methods
+    public void setCooldown(String playerName, long time) {
+        cooldowns.put(playerName, time);
+    }
+
+    public boolean isOnCooldown(String playerName) {
+        if (!cooldowns.containsKey(playerName)) {
+            return false;
+        }
+        long lastUseTime = cooldowns.get(playerName);
+        long currentTime = System.currentTimeMillis();
+        return currentTime < lastUseTime + COOLDOWN_TIME;
+    }
+
+    public long getRemainingCooldown(String playerName) {
+        if (!cooldowns.containsKey(playerName)) {
+            return 0;
+        }
+        long lastUseTime = cooldowns.get(playerName);
+        long currentTime = System.currentTimeMillis();
+        long remainingTime = lastUseTime + COOLDOWN_TIME - currentTime;
+        return TimeUnit.MILLISECONDS.toSeconds(remainingTime); // Returns the remaining time in seconds
+    }
+
+    // Inner class to store channel information
     private static class ChannelInfo {
         private final String platform;
         private final String link;
