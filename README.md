@@ -1,6 +1,5 @@
 ### README for Media Alerts  
 
-```markdown  
 # 🎥 Media Alerts  
 
 Media Alerts is a lightweight and customizable plugin designed for Minecraft streamers. With a simple
@@ -69,4 +68,3 @@ Need help? Have questions? Feel free to reach out through my discord @datebloxi.
 
 Created with ❤️ by **ElGrinchMC**.  
 Enjoy the plugin and happy streaming!  
-```
