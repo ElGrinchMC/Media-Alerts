@@ -39,7 +39,7 @@ Perfect for keeping your audience engaged while you play.
 
 ## 📂 Installation  
 
-1. Download the latest version of Media Alerts from the [Releases](https://github.com/YourUsername/MediaAlerts/releases) page.  
+1. Download the latest version of Media Alerts from the [Releases]([https://github.com/YourUsername/MediaAlerts/releases](https://www.spigotmc.org/resources/media-alerts-v1-0-easy-stream-notifications.121499/)) page.  
 2. Drop the `.jar` file into your server's `plugins` folder.  
 3. Restart or reload your server.  
 
