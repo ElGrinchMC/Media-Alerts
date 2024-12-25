@@ -1,0 +1,27 @@
+name: MediaAlert
+version: 1.0
+main: com.grinch.MediaAlertPlugin
+api-version: 1.20
+author: ElGrinchMC
+description: A plugin designed to help servers with streamers to announce their In-game streams in a simpler way..
+commands:
+  media:
+    description: MediaAlert Main command.
+    usage: /media
+    permission: media.use
+permissions:
+  media.add:
+    description: Allow add channels.
+    default: op
+  media.remove:
+    description: Allow remove channels.
+    default: op
+  media.alert:
+    description: Allow send stream alerts.
+    default: op
+  media.alert.others:
+    description: Allow send orther channels alerts.
+    default: op
+  media.use:
+    description: Allow use /media command
+    default: op
